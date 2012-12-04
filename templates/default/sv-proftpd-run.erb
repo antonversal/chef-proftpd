@@ -1,0 +1,3 @@
+#!/bin/sh
+exec 2>&1
+exec <%= node[:proftpd][:src_binary] %> -n -d 1 -c <%= node[:proftpd][:dir] %>/proftpd.conf
