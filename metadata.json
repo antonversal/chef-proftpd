@@ -1,0 +1,130 @@
+{
+  "name": "chef-proftpd",
+  "description": "Installs and configures proftpd",
+  "long_description": "",
+  "maintainer": "Anton Versal",
+  "maintainer_email": "ant.ver@gmail.com",
+  "license": "MIT",
+  "platforms": {
+    "ubuntu": ">= 0.0.0"
+  },
+  "dependencies": {
+    "build-essential": ">= 0.0.0"
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+    "proftpd/dir": {
+      "display_name": "proftpd directory",
+      "description": "Location of proftpd configuration files",
+      "default": "/etc/proftpd",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "proftpd/log_dir": {
+      "display_name": "proftpd log directory",
+      "description": "Location of proftpd log files",
+      "default": "/var/log/proftpd",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "proftpd/contrib_modules": {
+      "display_name": "contrib modules",
+      "description": "list of proftpd contrib modules",
+      "default": null,
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "proftpd/user": {
+      "display_name": "Proftpd user",
+      "description": "User that runs proftpd service",
+      "default": "proftpd",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "proftpd/port": {
+      "display_name": "Server port",
+      "description": "ftp server port, usually 21",
+      "default": "21",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "proftpd/max_instances": {
+      "display_name": "Maximum instances",
+      "description": "Maximum number of child processes",
+      "default": "30",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "proftpd/umask": {
+      "display_name": "Umask",
+      "description": "Umask",
+      "default": "022",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string",
+      "required": "optional",
+      "recipes": [
+
+      ]
+    }
+  },
+  "groupings": {
+  },
+  "recipes": {
+    "proftpd::source": "Installs proftpd from source and sets up configuration"
+  },
+  "version": "0.0.1"
+}

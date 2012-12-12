@@ -37,12 +37,12 @@ attribute "proftpd/user",
 attribute "proftpd/port",
   :display_name => "Server port",
   :description => "ftp server port, usually 21",
-  :default => 21
+  :default => "21"
 
 attribute "proftpd/max_instances",
   :display_name => "Maximum instances",
   :description => "Maximum number of child processes",
-  :default => 30
+  :default => "30"
 
 attribute "proftpd/umask",
   :display_name => "Umask",
