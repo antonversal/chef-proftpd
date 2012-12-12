@@ -2,12 +2,14 @@ ServerName			"ProFTPD Default Installation"
 ServerType			standalone
 DefaultServer			on
 
+PidFile			/var/run/proftpd.pid
+
 # Port 21 is the standard FTP port.
-Port				21
+Port			<%=	node[:proftpd][:port] %>
 
 # Umask 022 is a good standard umask to prevent new dirs and files
 # from being group and world writable.
-Umask				022
+Umask				<%=	node[:proftpd][:umask] %>
 
 # To prevent DoS attacks, set the maximum number of child processes
 # to 30.  If you need to allow more than 30 concurrent connections
@@ -15,39 +17,45 @@ Umask				022
 # in standalone mode, in inetd mode you should use an inetd server
 # that allows you to limit maximum number of processes per service
 # (such as xinetd).
-MaxInstances			30
+MaxInstances			<%=	node[:proftpd][:max_instances] %>
 
 # Set the user and group under which the server will run.
 User				<%= node[:proftpd][:user] %>
-Group				nogroup
+Group				<%= node[:proftpd][:user] %>
 
 # To cause every FTP user to be "jailed" (chrooted) into their home
 # directory, uncomment this line.
-#DefaultRoot ~
+# DefaultRoot ~
 
 # Normally, we want files to be overwriteable.
 <Directory />
   AllowOverwrite		on
 </Directory>
 
-# A basic anonymous configuration, no upload directories.  If you do not
-# want anonymous users, simply delete this entire <Anonymous> section.
-<Anonymous ~ftp>
-  User				<%= node[:proftpd][:ftp_user] %>
-  Group				nogroup
 
-  # We want clients to be able to login with "anonymous" as well as "ftp"
-  UserAlias			anonymous ftp
+#
+# Logging options
+#
+SystemLog         <%=	node[:proftpd][:log_dir] %>/system.log
 
-  # Limit the maximum number of anonymous logins
-  MaxClients			10
+TransferLog       <%=	node[:proftpd][:log_dir] %>/xfer.log
 
-  # We want 'welcome.msg' displayed at login, and '.message' displayed
-  # in each newly chdired directory.
-  DisplayLogin			welcome.msg
+# Some logging formats
+#
+LogFormat            default "%h %l %u %t \"%r\" %s %b"
+LogFormat            auth    "%v [%P] %h %t \"%r\" %s"
+LogFormat            write   "%h %l %u %t \"%r\" %s %b"
 
-  # Limit WRITE everywhere in the anonymous chroot
-  <Limit WRITE>
-    DenyAll
-  </Limit>
-</Anonymous>
+# Log file/dir access
+ExtendedLog         		<%=	node[:proftpd][:log_dir] %>/access.log    WRITE,READ write
+
+# Record all logins
+ExtendedLog          		<%=	node[:proftpd][:log_dir] %>/auth.log      AUTH auth
+
+# Paranoia logging level....
+ExtendedLog          		<%=	node[:proftpd][:log_dir] %>/paranoid.log  ALL default
+
+#
+# Do a chroot for web-users (i.e. public or www group), but
+# do not change root if the user is also in the users group...
+#
