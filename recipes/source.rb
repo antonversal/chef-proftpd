@@ -9,10 +9,6 @@
 
 include_recipe "build-essential"
 
-unless platform?("centos","redhat","fedora")
-  include_recipe "runit"
-end
-
 proftpd_version = node[:proftpd][:version]
 
 contrib_modules = node[:proftpd][:contrib_modules]
@@ -35,7 +31,7 @@ if contrib_modules.include?(:mod_sql_postgres)
 end
 
 
-if contrib_modules.any?{ |m| [:mod_tls, :mod_sql_passwd].include?(m) }
+if contrib_modules.any? { |m| [:mod_tls, :mod_sql_passwd].include?(m) }
   with_includes_flag << "/usr/local/openssl/include"
   with_libraries_flag << "/usr/local/openssl/lib"
   redhat_libs << "openssl-devel"
@@ -43,16 +39,16 @@ if contrib_modules.any?{ |m| [:mod_tls, :mod_sql_passwd].include?(m) }
 end
 
 packages = value_for_platform(
-    ["centos","redhat","fedora"] => {'default' => redhat_libs},
-    "default" => default_libs
-  )
+  ["centos", "redhat", "fedora"] => {'default' => redhat_libs},
+  "default" => default_libs
+)
 
 packages.each do |devpkg|
   package devpkg
 end
 
-node.set[:proftpd][:install_path]    = "/opt/proftpd-#{proftpd_version}"
-node.set[:proftpd][:src_binary]      = "#{node[:proftpd][:install_path]}/sbin/proftpd"
+node.set[:proftpd][:install_path] = "/opt/proftpd-#{proftpd_version}"
+node.set[:proftpd][:src_binary] = "#{node[:proftpd][:install_path]}/sbin/proftpd"
 
 configure_flags = ["--prefix=#{node[:proftpd][:install_path]}"]
 configure_flags << "--with-modules=#{contrib_modules.join(":")}" if contrib_modules.size > 0
@@ -76,17 +72,14 @@ bash "compile_proftpd_source" do
   creates node[:proftpd][:src_binary]
 end
 
-
-user node[:proftpd][:ftp_user] do
-  comment "ftp user"
-  shell "/bin/false"
-  home "/home/ftp"
-end
-
 user node[:proftpd][:user] do
   comment "proftpd user"
   shell "/bin/false"
   home "/var/run/proftpd"
+end
+
+group node[:proftpd][:user] do
+  members [node[:proftpd][:user]]
 end
 
 directory node[:proftpd][:log_dir] do
@@ -101,35 +94,20 @@ directory node[:proftpd][:dir] do
   mode "0755"
 end
 
-unless platform?("centos","redhat","fedora")
-  runit_service "proftpd"
 
-  service "proftpd" do
-    subscribes :restart, resources(:bash => "compile_proftpd_source")
-  end
-else
-  #install init db script
-  template "/etc/init.d/proftpd" do
-    source "proftpd.init.erb"
-    owner "root"
-    group "root"
-    mode "0755"
-  end
+#install init db script
+template "/etc/init.d/proftpd" do
+  source "proftpd.init.erb"
+  owner "root"
+  group "root"
+  mode "0755"
+end
 
-  #install sysconfig file (not really needed but standard)
-  template "/etc/sysconfig/proftpd" do
-    source "proftpd.sysconfig.erb"
-    owner "root"
-    group "root"
-    mode "0644"
-  end
-
-  #register service
-  service "proftpd" do
-    supports :status => true, :restart => true, :reload => true
-    action :enable
-    subscribes :restart, resources(:bash => "compile_proftpd_source")
-  end
+#register service
+service "proftpd" do
+  supports :status => true, :restart => true, :reload => true
+  action :enable
+  subscribes :restart, resources(:bash => "compile_proftpd_source")
 end
 
 template "proftpd.conf" do
