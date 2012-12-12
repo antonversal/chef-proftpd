@@ -2,8 +2,8 @@
 
 # ProFTPD files
 FTPD_BIN=<%= node[:proftpd][:src_binary] %>
-FTPD_CONF=<%= "#{node[:proftpd][:dir]}/proftpd.conf" %>
-PIDFILE=/var/run/proftpd.pid
+FTPD_CONF=${FTPD_CONF:-<%= "#{node[:proftpd][:dir]}/proftpd.conf" %>}
+PIDFILE=${PIDFILE:-/var/run/proftpd.pid}
 
 # If PIDFILE exists, does it point to a proftpd process?
 
@@ -31,6 +31,7 @@ case $1 in
 
     else
       echo "$0: cannot start proftpd -- $FTPD_CONF missing"
+      exit 1
     fi
     ;;
 
@@ -41,11 +42,27 @@ case $1 in
 
     else
       echo "$0: proftpd not running"
-      exit 1
     fi
     ;;
 
   restart)
+    if [ -n "$pid" ]; then
+      echo "Rehashing proftpd configuration"
+      kill -TERM $pid
+    fi
+
+    if [ -r $FTPD_CONF ]; then
+      echo "Starting proftpd..."
+
+      $FTPD_BIN -c $FTPD_CONF
+
+    else
+      echo "$0: cannot start proftpd -- $FTPD_CONF missing"
+      exit 1
+    fi
+    ;;
+
+  reload)
     if [ -n "$pid" ]; then
       echo "Rehashing proftpd configuration"
       kill -HUP $pid
@@ -57,7 +74,7 @@ case $1 in
     ;;
 
   *)
-    echo "usage: $0 {start|stop|restart}"
+    echo "usage: $0 {start|stop|restart|reload}"
     exit 1
     ;;
 
